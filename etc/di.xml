@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) 2021. All rights reserved.
+  ~ @author: Volodymyr Hryvinskyi <mailto:volodymyr@hryvinskyi.com>
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Hryvinskyi\SeoRobotsApi\Api\RobotsListInterface"
+                type="Hryvinskyi\SeoRobots\Model\RobotsList"/>
+    <preference for="Hryvinskyi\SeoRobotsApi\Api\ConfigInterface"
+                type="Hryvinskyi\SeoRobots\Model\Config"/>
+</config>

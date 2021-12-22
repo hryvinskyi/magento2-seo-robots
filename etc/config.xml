@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) 2021. All rights reserved.
+  ~ @author: Volodymyr Hryvinskyi <mailto:volodymyr@hryvinskyi.com>
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <hryvinskyi_seo>
+            <robots>
+                <enabled>1</enabled>
+                <meta_robots><![CDATA[{
+	"r1": {
+		"pattern": "*?*",
+		"option": "1",
+		"priority": "0"
+	},
+	"r2": {
+		"pattern": "*?p=*",
+		"option": "4",
+		"priority": "10"
+	},
+	"r3": {
+		"pattern": "*catalog\/product\/view\/id*",
+		"option": "1",
+		"priority": "0"
+	},
+	"r4": {
+		"pattern": "*catalogsearch/*",
+		"option": "1",
+		"priority": "0"
+	},
+	"r5": {
+		"pattern": "*customer\/account*",
+		"option": "1",
+		"priority": "0"
+	},
+	"r6": {
+		"pattern": "*review\/product\/list*",
+		"option": "1",
+		"priority": "0"
+	}
+}]]></meta_robots>
+                <https_meta_robots>0</https_meta_robots>
+                <is_noindex_nofollow_for_no_route_index>1</is_noindex_nofollow_for_no_route_index>
+            </robots>
+        </hryvinskyi_seo>
+    </default>
+</config>
