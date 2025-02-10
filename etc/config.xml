@@ -16,11 +16,6 @@
 		"option": "1",
 		"priority": "0"
 	},
-	"r2": {
-		"pattern": "*?p=*",
-		"option": "4",
-		"priority": "10"
-	},
 	"r3": {
 		"pattern": "*catalog\/product\/view\/id*",
 		"option": "1",
@@ -44,6 +39,8 @@
 }]]></meta_robots>
                 <https_meta_robots>0</https_meta_robots>
                 <is_noindex_nofollow_for_no_route_index>1</is_noindex_nofollow_for_no_route_index>
+                <paginated_robots>1</paginated_robots>
+                <paginated_robots_type>4</paginated_robots_type>
             </robots>
         </hryvinskyi_seo>
     </default>
