@@ -24,6 +24,14 @@ class RobotsList implements RobotsListInterface
                 return 'NOINDEX,FOLLOW';
             case self::INDEX_NOFOLLOW:
                 return 'INDEX,NOFOLLOW';
+            case self::NOINDEX_NOFOLLOW_NOARCHIVE:
+                return 'NOINDEX,NOFOLLOW,NOARCHIVE';
+            case self::NOINDEX_FOLLOW_NOARCHIVE:
+                return 'NOINDEX,FOLLOW,NOARCHIVE';
+            case self::INDEX_NOFOLLOW_NOARCHIVE:
+                return 'INDEX,NOFOLLOW,NOARCHIVE';
+            case self::INDEX_FOLLOW_NOARCHIVE:
+                return 'INDEX,FOLLOW,NOARCHIVE';
             case self::INDEX_FOLLOW:
             default:
                 return 'INDEX,FOLLOW';
