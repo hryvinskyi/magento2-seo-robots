@@ -20,32 +20,17 @@ class Config implements ConfigInterface
      */
     public const XML_CONF_ENABLED = 'hryvinskyi_seo/robots/enabled';
     public const XML_CONF_META_ROBOTS = 'hryvinskyi_seo/robots/meta_robots';
-    public const XML_CONF_HTTPS_META_ROBOTS = 'hryvinskyi_seo/robots/https_meta_robots';
-    public const XML_CONF_IS_NOINDEX_NOFOLLOW_FOR_NO_ROUTE_INDEX = 'hryvinskyi_seo/robots/is_noindex_nofollow_for_no_route_index';
+    public const XML_CONF_NO_ROUTE_ROBOTS_TYPES = 'hryvinskyi_seo/robots/no_route_robots_types';
     public const XML_CONF_PAGINATED_ROBOTS = 'hryvinskyi_seo/robots/paginated_robots';
     public const XML_CONF_PAGINATED_META_ROBOTS = 'hryvinskyi_seo/robots/paginated_robots_type';
     public const XML_CONF_ROBOTS_XHEADER_ENABLED = 'hryvinskyi_seo/robots/robots_xheader_enabled';
+    public const XML_CONF_XROBOTS_RULES = 'hryvinskyi_seo/robots/xrobots_rules';
+    public const XML_CONF_HTTPS_XROBOTS_DIRECTIVES = 'hryvinskyi_seo/robots/https_xrobots_directives';
 
-    /**
-     * @var ScopeConfigInterface
-     */
-    private $scopeConfig;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
-     * Config constructor.
-     *
-     * @param ScopeConfigInterface $scopeConfig
-     * @param SerializerInterface $serializer
-     */
-    public function __construct(ScopeConfigInterface $scopeConfig, SerializerInterface $serializer)
-    {
-        $this->scopeConfig = $scopeConfig;
-        $this->serializer = $serializer;
+    public function __construct(
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly SerializerInterface $serializer
+    ) {
     }
 
     /**
@@ -67,22 +52,36 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @inheritDoc
+     * Convert legacy code to directive array (for migration compatibility)
+     *
+     * @param int $code
+     * @return array
      */
-    public function getHttpsMetaRobots($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): int
+    private function convertCodeToDirectives(int $code): array
     {
-        return (int)$this->scopeConfig->getValue(static::XML_CONF_HTTPS_META_ROBOTS, $scopeType, $scopeCode);
+        $map = [
+            1 => ['noindex', 'nofollow'],
+            2 => ['noindex', 'follow'],
+            3 => ['index', 'nofollow'],
+            4 => ['index', 'follow'],
+            5 => ['noindex', 'nofollow', 'noarchive'],
+            6 => ['noindex', 'follow', 'noarchive'],
+            7 => ['index', 'nofollow', 'noarchive'],
+            8 => ['index', 'follow', 'noarchive'],
+        ];
+
+        return $map[$code] ?? ['index', 'follow'];
     }
 
     /**
      * @inheritDoc
      */
-    public function isNoindexNofollowForNoRouteIndex(
+    public function getNoRouteRobotsTypes(
         $scopeCode = null,
         string $scopeType = ScopeInterface::SCOPE_STORE
-    ): bool {
+    ): array {
         return $this->scopeConfig->isSetFlag(
-            self::XML_CONF_IS_NOINDEX_NOFOLLOW_FOR_NO_ROUTE_INDEX,
+            self::XML_CONF_NO_ROUTE_ROBOTS_TYPES,
             $scopeType,
             $scopeCode
         );
@@ -99,9 +98,22 @@ class Config implements ConfigInterface
     /**
      * @inheritDoc
      */
-    public function getPaginatedMetaRobots($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): int
+    public function getPaginatedMetaRobots($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): array
     {
-        return (int)$this->scopeConfig->getValue(static::XML_CONF_PAGINATED_META_ROBOTS, $scopeType, $scopeCode);
+        $value = $this->scopeConfig->getValue(static::XML_CONF_PAGINATED_META_ROBOTS, $scopeType, $scopeCode);
+
+        // Handle legacy integer values (migration compatibility)
+        if (is_numeric($value)) {
+            return $this->convertCodeToDirectives((int)$value);
+        }
+
+        // Handle JSON-encoded directive array
+        if (is_string($value) && !empty($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
     }
 
     /**
@@ -114,5 +126,29 @@ class Config implements ConfigInterface
             $scopeType,
             $scopeCode
         );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getXRobotsRules($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): array
+    {
+        $value = $this->scopeConfig->getValue(static::XML_CONF_XROBOTS_RULES, $scopeType, $scopeCode);
+        return $value ? $this->serializer->unserialize($value) : [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHttpsXRobotsDirectives($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): array
+    {
+        $value = $this->scopeConfig->getValue(static::XML_CONF_HTTPS_XROBOTS_DIRECTIVES, $scopeType, $scopeCode);
+
+        if (is_string($value) && !empty($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
     }
 }

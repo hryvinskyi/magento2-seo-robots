@@ -13,34 +13,34 @@
                 <meta_robots><![CDATA[{
 	"r1": {
 		"pattern": "*?*",
-		"option": "1",
+		"meta_directives": ["index","follow"],
 		"priority": "0"
 	},
 	"r3": {
 		"pattern": "*catalog\/product\/view\/id*",
-		"option": "1",
+		"meta_directives": ["index","follow"],
 		"priority": "0"
 	},
 	"r4": {
 		"pattern": "*catalogsearch/*",
-		"option": "1",
+		"meta_directives": ["index","follow"],
 		"priority": "0"
 	},
 	"r5": {
 		"pattern": "*customer\/account*",
-		"option": "1",
+		"meta_directives": ["index","follow"],
 		"priority": "0"
 	},
 	"r6": {
 		"pattern": "*review\/product\/list*",
-		"option": "1",
+		"meta_directives": ["index","follow"],
 		"priority": "0"
 	}
 }]]></meta_robots>
-                <https_meta_robots>0</https_meta_robots>
-                <is_noindex_nofollow_for_no_route_index>1</is_noindex_nofollow_for_no_route_index>
+                <no_route_robots_types><![CDATA[["noindex","nofollow"]]]></no_route_robots_types>
                 <paginated_robots>1</paginated_robots>
-                <paginated_robots_type>4</paginated_robots_type>
+                <paginated_robots_type><![CDATA[["index","follow"]]]></paginated_robots_type>
+                <robots_xheader_enabled>1</robots_xheader_enabled>
             </robots>
         </hryvinskyi_seo>
     </default>
