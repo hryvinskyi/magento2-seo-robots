@@ -24,6 +24,7 @@ class Config implements ConfigInterface
     public const XML_CONF_IS_NOINDEX_NOFOLLOW_FOR_NO_ROUTE_INDEX = 'hryvinskyi_seo/robots/is_noindex_nofollow_for_no_route_index';
     public const XML_CONF_PAGINATED_ROBOTS = 'hryvinskyi_seo/robots/paginated_robots';
     public const XML_CONF_PAGINATED_META_ROBOTS = 'hryvinskyi_seo/robots/paginated_robots_type';
+    public const XML_CONF_ROBOTS_XHEADER_ENABLED = 'hryvinskyi_seo/robots/robots_xheader_enabled';
 
     /**
      * @var ScopeConfigInterface
@@ -101,5 +102,17 @@ class Config implements ConfigInterface
     public function getPaginatedMetaRobots($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): int
     {
         return (int)$this->scopeConfig->getValue(static::XML_CONF_PAGINATED_META_ROBOTS, $scopeType, $scopeCode);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isRobotsXheaderEnabled($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_CONF_ROBOTS_XHEADER_ENABLED,
+            $scopeType,
+            $scopeCode
+        );
     }
 }
