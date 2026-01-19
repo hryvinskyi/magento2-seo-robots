@@ -31,6 +31,8 @@ class Config implements ConfigInterface
     public const XML_CONF_XROBOTS_PAGINATED_TYPES = 'hryvinskyi_seo/robots/xrobots_paginated_types';
     public const XML_CONF_PAGINATED_FILTERED_ROBOTS = 'hryvinskyi_seo/robots/paginated_filtered_robots';
     public const XML_CONF_PAGINATED_FILTERED_META_ROBOTS = 'hryvinskyi_seo/robots/paginated_filtered_robots_type';
+    public const XML_CONF_XROBOTS_PAGINATED_FILTERED_ENABLED = 'hryvinskyi_seo/robots/xrobots_paginated_filtered_enabled';
+    public const XML_CONF_XROBOTS_PAGINATED_FILTERED_TYPES = 'hryvinskyi_seo/robots/xrobots_paginated_filtered_types';
 
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
@@ -184,6 +186,23 @@ class Config implements ConfigInterface
     public function getPaginatedFilteredMetaRobots($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): array
     {
         $value = $this->scopeConfig->getValue(static::XML_CONF_PAGINATED_FILTERED_META_ROBOTS, $scopeType, $scopeCode);
+        return $value ? $this->serializer->unserialize($value) : [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isXRobotsPaginatedFilteredEnabled($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): bool
+    {
+        return $this->scopeConfig->isSetFlag(static::XML_CONF_XROBOTS_PAGINATED_FILTERED_ENABLED, $scopeType, $scopeCode);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPaginatedFilteredXRobots($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): array
+    {
+        $value = $this->scopeConfig->getValue(static::XML_CONF_XROBOTS_PAGINATED_FILTERED_TYPES, $scopeType, $scopeCode);
         return $value ? $this->serializer->unserialize($value) : [];
     }
 }
