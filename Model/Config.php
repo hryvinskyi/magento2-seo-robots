@@ -26,6 +26,9 @@ class Config implements ConfigInterface
     public const XML_CONF_ROBOTS_XHEADER_ENABLED = 'hryvinskyi_seo/robots/robots_xheader_enabled';
     public const XML_CONF_XROBOTS_RULES = 'hryvinskyi_seo/robots/xrobots_rules';
     public const XML_CONF_HTTPS_XROBOTS_DIRECTIVES = 'hryvinskyi_seo/robots/https_xrobots_directives';
+    public const XML_CONF_XROBOTS_NO_ROUTE_TYPES = 'hryvinskyi_seo/robots/xrobots_no_route_types';
+    public const XML_CONF_XROBOTS_PAGINATED_ENABLED = 'hryvinskyi_seo/robots/xrobots_paginated_enabled';
+    public const XML_CONF_XROBOTS_PAGINATED_TYPES = 'hryvinskyi_seo/robots/xrobots_paginated_types';
 
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
@@ -80,11 +83,8 @@ class Config implements ConfigInterface
         $scopeCode = null,
         string $scopeType = ScopeInterface::SCOPE_STORE
     ): array {
-        return $this->scopeConfig->isSetFlag(
-            self::XML_CONF_NO_ROUTE_ROBOTS_TYPES,
-            $scopeType,
-            $scopeCode
-        );
+        $value = $this->scopeConfig->getValue(static::XML_CONF_NO_ROUTE_ROBOTS_TYPES, $scopeType, $scopeCode);
+        return $value ? $this->serializer->unserialize($value) : [];
     }
 
     /**
@@ -101,19 +101,7 @@ class Config implements ConfigInterface
     public function getPaginatedMetaRobots($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): array
     {
         $value = $this->scopeConfig->getValue(static::XML_CONF_PAGINATED_META_ROBOTS, $scopeType, $scopeCode);
-
-        // Handle legacy integer values (migration compatibility)
-        if (is_numeric($value)) {
-            return $this->convertCodeToDirectives((int)$value);
-        }
-
-        // Handle JSON-encoded directive array
-        if (is_string($value) && !empty($value)) {
-            $decoded = json_decode($value, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return [];
+        return $value ? $this->serializer->unserialize($value) : [];
     }
 
     /**
@@ -150,5 +138,33 @@ class Config implements ConfigInterface
         }
 
         return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getNoRouteXRobotsTypes(
+        $scopeCode = null,
+        string $scopeType = ScopeInterface::SCOPE_STORE
+    ): array {
+        $value = $this->scopeConfig->getValue(static::XML_CONF_XROBOTS_NO_ROUTE_TYPES, $scopeType, $scopeCode);
+        return $value ? $this->serializer->unserialize($value) : [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isXRobotsPaginatedEnabled($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): bool
+    {
+        return $this->scopeConfig->isSetFlag(static::XML_CONF_XROBOTS_PAGINATED_ENABLED, $scopeType, $scopeCode);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPaginatedXRobots($scopeCode = null, string $scopeType = ScopeInterface::SCOPE_STORE): array
+    {
+        $value = $this->scopeConfig->getValue(static::XML_CONF_XROBOTS_PAGINATED_TYPES, $scopeType, $scopeCode);
+        return $value ? $this->serializer->unserialize($value) : [];
     }
 }

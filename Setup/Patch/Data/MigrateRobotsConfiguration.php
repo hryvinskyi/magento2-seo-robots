@@ -12,6 +12,7 @@ namespace Hryvinskyi\SeoRobots\Setup\Patch\Data;
 use Hryvinskyi\SeoRobotsApi\Api\RobotsListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 
@@ -37,7 +38,9 @@ class MigrateRobotsConfiguration implements DataPatchInterface
     public function __construct(
         private readonly WriterInterface $configWriter,
         private readonly ScopeConfigInterface $scopeConfig,
-        private readonly SerializerInterface $serializer
+        private readonly RobotsListInterface $robotsList,
+        private readonly SerializerInterface $serializer,
+        private readonly ResourceConnection $resourceConnection
     ) {
     }
 
@@ -59,55 +62,64 @@ class MigrateRobotsConfiguration implements DataPatchInterface
     private function migrateMetaRobotsRules(): void
     {
         $configPath = 'hryvinskyi_seo/robots/meta_robots';
-        $currentConfig = $this->scopeConfig->getValue($configPath);
 
-        if (empty($currentConfig)) {
-            return;
-        }
+        // Find all scope configs
+        $connection = $this->resourceConnection->getConnection();
+        $table = $this->resourceConnection->getTableName('core_config_data');
+        $select = $connection->select()->from($table)->where("path = ?", $configPath);
+        $configs = $connection->fetchAll($select);
 
-        try {
-            $rules = $this->serializer->unserialize($currentConfig);
-
-            if (!is_array($rules)) {
+        foreach ($configs as $currentConfig) {
+            if (empty($currentConfig['value'])) {
                 return;
             }
 
-            $migratedRules = [];
-            $needsMigration = false;
+            try {
+                $rules = $this->serializer->unserialize($currentConfig['value']);
 
-            foreach ($rules as $k => $rule) {
-                // Check if this rule uses old 'option' field with integer code
-                if (isset($rule['option']) && is_numeric($rule['option'])) {
-                    $oldCode = (int)$rule['option'];
-                    $directives = self::CODE_TO_DIRECTIVES_MAP[$oldCode] ?? ['index', 'follow'];
-
-                    $migratedRules[$k] = [
-                        'priority' => $rule['priority'] ?? 0,
-                        'pattern' => $rule['pattern'] ?? '',
-                        'meta_directives' => $directives,
-                    ];
-
-                    $needsMigration = true;
-                } elseif (isset($rule['meta_directives'])) {
-                    // Already migrated format
-                    $migratedRules[] = $rule;
-                } else {
-                    // Unknown format, preserve as-is but add required fields
-                    $migratedRules[] = array_merge($rule, [
-                        'meta_directives' => ['index', 'follow'],
-                    ]);
+                if (!is_array($rules)) {
+                    return;
                 }
-            }
 
-            if ($needsMigration) {
-                $this->configWriter->save(
-                    $configPath,
-                    $this->serializer->serialize($migratedRules)
-                );
+                $migratedRules = [];
+                $needsMigration = false;
+
+                foreach ($rules as $k => $rule) {
+                    // Check if this rule uses old 'option' field with integer code
+                    if (isset($rule['option']) && is_numeric($rule['option'])) {
+                        $oldCode = (int)$rule['option'];
+                        $directives = $this->serializer->serialize($this->robotsList->convertToStructured(self::CODE_TO_DIRECTIVES_MAP[$oldCode] ?? ['index', 'follow']));
+
+                        $migratedRules[$k] = [
+                            'priority' => $rule['priority'] ?? 0,
+                            'pattern' => $rule['pattern'] ?? '',
+                            'meta_directives' => $directives,
+                        ];
+
+                        $needsMigration = true;
+                    } elseif (isset($rule['meta_directives'])) {
+                        // Already migrated format
+                        $migratedRules[] = $rule;
+                    } else {
+                        // Unknown format, preserve as-is but add required fields
+                        $migratedRules[] = array_merge($rule, [
+                            'meta_directives' => $this->serializer->serialize($this->robotsList->convertToStructured(['index', 'follow'])),
+                        ]);
+                    }
+                }
+
+                if ($needsMigration) {
+                    $this->configWriter->save(
+                        $configPath,
+                        $this->serializer->serialize($migratedRules),
+                        $currentConfig['scope'],
+                        $currentConfig['scope_id']
+                    );
+                }
+            } catch (\Exception $e) {
+                // Log error but don't break installation
+                // In production, you might want to use a logger here
             }
-        } catch (\Exception $e) {
-            // Log error but don't break installation
-            // In production, you might want to use a logger here
         }
     }
 
@@ -119,21 +131,30 @@ class MigrateRobotsConfiguration implements DataPatchInterface
     private function migrateHttpsMetaRobots(): void
     {
         $configPath = 'hryvinskyi_seo/robots/https_meta_robots';
-        $httpsCode = $this->scopeConfig->getValue($configPath);
 
-        if (empty($httpsCode) || !is_numeric($httpsCode)) {
-            return;
-        }
+        // Find all scope configs
+        $connection = $this->resourceConnection->getConnection();
+        $table = $this->resourceConnection->getTableName('core_config_data');
+        $select = $connection->select()->from($table)->where("path = ?", $configPath);
+        $configs = $connection->fetchAll($select);
 
-        try {
-            $directives = self::CODE_TO_DIRECTIVES_MAP[(int)$httpsCode] ?? ['index', 'follow'];
+        foreach ($configs as $currentConfig) {
+            if (empty($currentConfig['value']) || !is_numeric($currentConfig['value'])) {
+                return;
+            }
 
-            $this->configWriter->save(
-                $configPath,
-                json_encode($directives)
-            );
-        } catch (\Exception $e) {
-            // Log error but don't break installation
+            try {
+                $directives = self::CODE_TO_DIRECTIVES_MAP[(int)$currentConfig['value']] ?? ['index', 'follow'];
+
+                $this->configWriter->save(
+                    $configPath,
+                    json_encode($directives),
+                    $currentConfig['scope'],
+                    $currentConfig['scope_id']
+                );
+            } catch (\Exception $e) {
+                // Log error but don't break installation
+            }
         }
     }
 
@@ -145,21 +166,29 @@ class MigrateRobotsConfiguration implements DataPatchInterface
     private function migratePaginatedRobots(): void
     {
         $configPath = 'hryvinskyi_seo/robots/paginated_robots_type';
-        $paginatedCode = $this->scopeConfig->getValue($configPath);
+        // Find all scope configs
+        $connection = $this->resourceConnection->getConnection();
+        $table = $this->resourceConnection->getTableName('core_config_data');
+        $select = $connection->select()->from($table)->where("path = ?", $configPath);
+        $configs = $connection->fetchAll($select);
 
-        if (empty($paginatedCode) || !is_numeric($paginatedCode)) {
-            return;
-        }
+        foreach ($configs as $currentConfig) {
+            if (empty($currentConfig['value']) || !is_numeric($currentConfig['value'])) {
+                return;
+            }
 
-        try {
-            $directives = self::CODE_TO_DIRECTIVES_MAP[(int)$paginatedCode] ?? ['index', 'follow'];
+            try {
+                $directives = self::CODE_TO_DIRECTIVES_MAP[(int)$currentConfig['value']] ?? ['index', 'follow'];
 
-            $this->configWriter->save(
-                $configPath,
-                json_encode($directives)
-            );
-        } catch (\Exception $e) {
-            // Log error but don't break installation
+                $this->configWriter->save(
+                    $configPath,
+                    json_encode($directives),
+                    $currentConfig['scope'],
+                    $currentConfig['scope_id']
+                );
+            } catch (\Exception $e) {
+                // Log error but don't break installation
+            }
         }
     }
 
