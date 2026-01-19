@@ -40,6 +40,8 @@
                 <no_route_robots_types><![CDATA[[{"value":"noindex","bot":"","modification":""},{"value":"nofollow","bot":"","modification":""}]]]></no_route_robots_types>
                 <paginated_robots>1</paginated_robots>
                 <paginated_robots_type><![CDATA[[{"value":"index","bot":"","modification":""},{"value":"follow","bot":"","modification":""}]]]></paginated_robots_type>
+                <paginated_filtered_robots>1</paginated_filtered_robots>
+                <paginated_filtered_robots_type><![CDATA[[{"value":"noindex","bot":"","modification":""},{"value":"follow","bot":"","modification":""}]]]></paginated_filtered_robots_type>
                 <robots_xheader_enabled>1</robots_xheader_enabled>
                 <xrobots_no_route_types><![CDATA[[{"value":"noindex","bot":"","modification":""},{"value":"nofollow","bot":"","modification":""}]]]></xrobots_no_route_types>
                 <xrobots_paginated_enabled>1</xrobots_paginated_enabled>

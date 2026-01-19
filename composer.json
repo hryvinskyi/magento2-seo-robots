@@ -1,6 +1,6 @@
 {
     "name": "hryvinskyi/magento2-seo-robots",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "Core implementation of SEO Robots module with flexible directive management and automatic migration",
     "type": "magento2-module",
     "require": {
