@@ -46,6 +46,8 @@
                 <xrobots_no_route_types><![CDATA[[{"value":"noindex","bot":"","modification":""},{"value":"nofollow","bot":"","modification":""}]]]></xrobots_no_route_types>
                 <xrobots_paginated_enabled>1</xrobots_paginated_enabled>
                 <xrobots_paginated_types><![CDATA[[{"value":"index","bot":"","modification":""},{"value":"follow","bot":"","modification":""}]]]></xrobots_paginated_types>
+				<xrobots_paginated_filtered_enabled>1</xrobots_paginated_enabled>
+                <xrobots_paginated_filtered_types><![CDATA[[{"value":"noindex","bot":"","modification":""},{"value":"follow","bot":"","modification":""}]]]></xrobots_paginated_types>
             </robots>
         </hryvinskyi_seo>
     </default>
