@@ -122,16 +122,16 @@ class RobotsList implements RobotsListInterface
 
         // Add global directives first (without bot name)
         if (isset($botDirectives['*'])) {
-            $result[] = strtoupper(implode(', ', $botDirectives['*']));
+            $result[] = strtoupper(implode(',', $botDirectives['*']));
             unset($botDirectives['*']);
         }
 
         // Add bot-specific directives
         foreach ($botDirectives as $botName => $botDirs) {
-            $result[] = $botName . ': ' . strtoupper(implode(', ', $botDirs));
+            $result[] = $botName . ': ' . strtoupper(implode(',', $botDirs));
         }
 
-        return implode(', ', $result);
+        return implode(',', $result);
     }
 
     /**
@@ -227,7 +227,7 @@ class RobotsList implements RobotsListInterface
                 if (!in_array($value, self::MAX_IMAGE_PREVIEW_VALUES)) {
                     return sprintf(
                         'max-image-preview must be one of: %s, got "%s"',
-                        implode(', ', self::MAX_IMAGE_PREVIEW_VALUES),
+                        implode(',', self::MAX_IMAGE_PREVIEW_VALUES),
                         $value
                     );
                 }
@@ -277,7 +277,7 @@ class RobotsList implements RobotsListInterface
             $result[] = $directiveStr;
         }
 
-        return implode(', ', array_unique($result));
+        return implode(',', array_unique($result));
     }
 
     /**
@@ -322,16 +322,16 @@ class RobotsList implements RobotsListInterface
 
         // Global directives first
         if (isset($botGroups['*'])) {
-            $result[] = strtoupper(implode(', ', $botGroups['*']));
+            $result[] = strtoupper(implode(',', $botGroups['*']));
             unset($botGroups['*']);
         }
 
         // Bot-specific directives
         foreach ($botGroups as $bot => $dirs) {
-            $result[] = $bot . ': ' . strtoupper(implode(', ', $dirs));
+            $result[] = $bot . ': ' . strtoupper(implode(',', $dirs));
         }
 
-        return implode(', ', $result);
+        return implode(',', $result);
     }
 
     /**
@@ -451,7 +451,7 @@ class RobotsList implements RobotsListInterface
                     'value' => 'all',
                     'label' => 'all',
                     'description' => 'No restrictions for indexing or serving (default)',
-                    'conflicts' => ['noindex', 'nofollow', 'none']
+                    'conflicts' => array('noindex', 'nofollow', 'none')
                 ],
                 [
                     'value' => 'index',
