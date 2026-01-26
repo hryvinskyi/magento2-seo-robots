@@ -14,12 +14,12 @@
 	"r1": {
 		"pattern": "*?*",
 		"meta_directives": "[{\"value\":\"noindex\",\"bot\":\"\",\"modification\":\"\"},{\"value\":\"nofollow\",\"bot\":\"\",\"modification\":\"\"}]",
-		"priority": "0"
+		"priority": "9900"
 	},
 	"r3": {
 		"pattern": "*catalog\/product\/view\/id*",
 		"meta_directives": "[{\"value\":\"noindex\",\"bot\":\"\",\"modification\":\"\"},{\"value\":\"nofollow\",\"bot\":\"\",\"modification\":\"\"}]",
-		"priority": "0"
+		"priority": "2100"
 	},
 	"r4": {
 		"pattern": "*catalogsearch/*",
